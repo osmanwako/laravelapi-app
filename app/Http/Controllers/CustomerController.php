@@ -14,7 +14,7 @@ class CustomerController extends Controller
     public function index()
     {
         try {
-            $customers = DB::table('customers')->orderByDesc('created_at')->get();
+            $customers = DB::table('customers')->orderByDesc('updated_at')->get();
             return response()->json(['customers' => $customers]);
         } catch (QueryException $e) {
             return response()->json(['error' => 'Database error: ' . $e->getMessage()], 500);
@@ -34,8 +34,12 @@ class CustomerController extends Controller
 
             $data['created_at'] = date('Y-m-d H:i:s');
             $data['updated_at'] = date('Y-m-d H:i:s');
-            $customer = DB::table('customers')->insert($data);
-            return response()->json(['customer' => $customer, 'message' => 'Customer created successfully'], 201);
+            $result = DB::table('customers')->insert($data);
+            $customer='';
+            if($result){
+            $customer = DB::table('customers')->where('email', $data['email'])->first();
+            }
+            return response()->json(['customer' => $customer, 'message' => 'Customer created successfully'], 200);
         } catch (ValidationException $e) {
             return response()->json(['errors' => $e->validator->errors()], 422);
         } catch (Exception $e) {
